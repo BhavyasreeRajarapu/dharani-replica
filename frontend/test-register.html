@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Register Test</title>
+</head>
+<body>
+  <h2>Register</h2>
+<form id="registerForm">
+  <input type="text" id="name" placeholder="Name" required><br>
+  <input type="email" id="email" placeholder="Email" required><br>
+  <input type="password" id="password" placeholder="Password" required><br>
+  <button type="submit">Register</button>
+</form>
+
+<div id="message"></div>
+
+<script>
+const form = document.getElementById('registerForm');
+const message = document.getElementById('message');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const data = {
+    name: form.name.value,
+    email: form.email.value,
+    password: form.password.value,
+    role: 'citizen'
+  };
+
+  try {
+    const res = await fetch('http://localhost:5000/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    const json = await res.json();
+
+    if (res.ok) {
+      message.textContent = "✅ Registration successful! Redirecting to login...";
+      setTimeout(() => {
+        window.location.href = "test-login.html"; // redirect without alert
+      }, 1500);
+    } else {
+      message.textContent = "❌ Registration failed: " + json.error;
+    }
+  } catch (err) {
+    message.textContent = "⚠️ Error: " + err;
+  }
+});
+</script>
+</body>
+</html>

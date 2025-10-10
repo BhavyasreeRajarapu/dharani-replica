@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dharani Portal - Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    button { margin: 5px 0; padding: 8px 12px; }
+    #recordsContainer { margin-top: 20px; white-space: pre-wrap; background: #f4f4f4; padding: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h2>Welcome to Dharani Portal Dashboard</h2>
+  <p id="welcomeMsg"></p>
+
+  <button id="getRecords">Get Land Records</button>
+  <button id="logoutBtn">Logout</button>
+
+  <div id="recordsContainer"></div>
+
+  <script>
+    // Helper to check token expiry
+    function isTokenExpired(token) {
+      if (!token) return true;
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.exp < Math.floor(Date.now() / 1000);
+      } catch {
+        return true;
+      }
+    }
+
+    const token = localStorage.getItem('token');
+
+    // Redirect to login if no valid token
+    if (!token || isTokenExpired(token)) {
+      localStorage.removeItem('token');
+      window.location.href = "login.html";
+    } else {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      document.getElementById('welcomeMsg').textContent = 
+        `Hello, ${payload.email}! You are successfully logged in.`;
+    }
+
+    // Fetch land records
+    document.getElementById("getRecords").addEventListener("click", async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token || isTokenExpired(token)) {
+        alert("⚠️ Session expired. Please login again.");
+        localStorage.removeItem("token");
+        window.location.href = "login.html";
+        return;
+      }
+
+      try {
+        const res = await fetch("http://localhost:5000/api/lands", {
+          headers: { 'Authorization': "Bearer " + token }
+        });
+
+        const data = await res.json();
+
+        if (!Array.isArray(data)) {
+          document.getElementById("recordsContainer").textContent =
+            "Error: Unexpected response from server";
+          return;
+        }
+
+        const container = document.getElementById("recordsContainer");
+        container.innerHTML = ""; // clear previous
+
+        data.forEach((land) => {
+          const p = document.createElement("p");
+          p.textContent = `Survey No: ${land.surveyNo}, Location: ${land.location}, Area: ${land.area}`;
+          container.appendChild(p);
+        });
+
+      } catch (err) {
+        document.getElementById("recordsContainer").textContent =
+          "Error fetching records: " + err;
+      }
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('token');
+      window.location.href = "login.html";
+    });
+  </script>
+</body>
+</html>
