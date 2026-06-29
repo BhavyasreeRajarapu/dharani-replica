@@ -1,6 +1,6 @@
 # Dharani Portal Replica
 
-**Project Type:** Full-Stack Web Application (In Progress)  
+**Project Type:** Full-Stack Web Application   
 **Tech Stack:** React.js, Node.js, Express.js, PostgreSQL/MySQL, Tailwind CSS, JWT Authentication  
 
 ---
